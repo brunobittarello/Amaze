@@ -7,6 +7,7 @@ public class GameplayBehaviour : MonoBehaviour
 
     const char WALL_ID = '1';
     const char PLAYER_ID = '2';
+    const int CHECK_ID = 3;
 
     [SerializeField]
     private TextAsset stageMap;
@@ -15,12 +16,16 @@ public class GameplayBehaviour : MonoBehaviour
     private GameObject PlayerPrefab;
     [SerializeField]
     private GameObject WallPrefab;
+    [SerializeField]
+    private GameObject TileCheckPrefab;
 
     private Transform _wallPool;
+    private Transform _tilePool;
     private Transform _stage;
     private int[][] _stageMap;
     private Transform _player;
     private Vector2Int _playerPos;
+    private Vector2Int _playerNextPos;
     private Vector2Int _playerMovement;
     private bool _isMoving;
 
@@ -30,6 +35,10 @@ public class GameplayBehaviour : MonoBehaviour
         _wallPool = new GameObject("WallPool").transform;
         _wallPool.parent = this.transform;
         _wallPool.gameObject.SetActive(false);
+
+        _tilePool = new GameObject("TilePool").transform;
+        _tilePool.parent = this.transform;
+        _tilePool.gameObject.SetActive(false);
 
         _stage = new GameObject("Stage").transform;
         _stage.parent = this.transform;
@@ -53,6 +62,13 @@ public class GameplayBehaviour : MonoBehaviour
             var clone = Instantiate(WallPrefab);
             clone.gameObject.name = "Wall " + (i + 1);
             clone.transform.parent = _wallPool;
+        }
+
+        for (int i = 0; i < POOL_SIZE; i++)
+        {
+            var clone = Instantiate(TileCheckPrefab);
+            clone.gameObject.name = "Tile " + (i + 1);
+            clone.transform.parent = _tilePool;
         }
     }
 
@@ -78,6 +94,7 @@ public class GameplayBehaviour : MonoBehaviour
                     _player.parent = _stage;
                     _player.localPosition = new Vector2(i, l);
                     _playerPos = new Vector2Int(i, l);
+                    CheckTile(_playerPos);
                 }
             }
         }
@@ -101,6 +118,7 @@ public class GameplayBehaviour : MonoBehaviour
         {
             _isMoving = true;
             _playerMovement = movement;
+            _playerNextPos = _playerPos + movement;
         }
     }
 
@@ -121,22 +139,37 @@ public class GameplayBehaviour : MonoBehaviour
 
     void Move()
     {
-        Vector2 newPos = (Vector2)_player.localPosition + (Vector2)_playerMovement * PLAYER_SPEED * Time.deltaTime;
-        Vector2 nextPosition = _playerPos + _playerMovement;
-        if ((nextPosition - newPos).sqrMagnitude < 0.005f)
+        var delta = PLAYER_SPEED * Time.deltaTime;
+        Vector2 newPos = (Vector2)_player.localPosition + (Vector2)_playerMovement * delta;
+        if ((_playerNextPos - newPos).sqrMagnitude < delta * 0.5f)
             PlayerReachedNewTile();
-        //else 
+        else
             _player.localPosition = newPos;
     }
 
     void PlayerReachedNewTile()
     {
         _playerPos += _playerMovement;
-        if (!CanPlayerMove(_playerMovement))
+        CheckTile(_playerPos);
+        if (CanPlayerMove(_playerMovement))
         {
-            _isMoving = false;
-            _playerMovement = Vector2Int.zero;
-            //_player.localPosition = (Vector2)_playerPos;
+            _playerNextPos = _playerPos + _playerMovement;
+            return;
         }
+
+        _isMoving = false;
+        _playerMovement = Vector2Int.zero;
+        _player.localPosition = (Vector2)_playerPos;
+    }
+
+    void CheckTile(Vector2Int tilePos)
+    {
+        if (_stageMap[tilePos.x][tilePos.y] != 0)
+            return;
+
+        _stageMap[tilePos.x][tilePos.y] = CHECK_ID;
+        var tile = _tilePool.GetChild(0);
+        tile.parent = _stage;
+        tile.localPosition = (Vector2)tilePos;
     }
 }

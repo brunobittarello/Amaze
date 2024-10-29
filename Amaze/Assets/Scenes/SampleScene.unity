@@ -155,6 +155,7 @@ MonoBehaviour:
   stageMap: {fileID: 4900000, guid: ac9ff0e4eeddd61429a6a08f006afd4a, type: 3}
   PlayerPrefab: {fileID: 5600620423238713294, guid: 56bd2286ac5707c4caf8454552b57d7a, type: 3}
   WallPrefab: {fileID: 2850100951796789173, guid: 7dfdca7a6bddb454383d160b5e22bbd1, type: 3}
+  TileCheckPrefab: {fileID: 1997600373942698753, guid: 20e1677d2e4b49a4788f14148b0f5f61, type: 3}
 --- !u!4 &45780132
 Transform:
   m_ObjectHideFlags: 0
