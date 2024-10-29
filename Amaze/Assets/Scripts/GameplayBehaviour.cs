@@ -1,11 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Scripting.APIUpdating;
 
 public class GameplayBehaviour : MonoBehaviour
 {
     const int POOL_SIZE = 50;
+    const float PLAYER_SPEED = 10f;
 
     const char WALL_ID = '1';
     const char PLAYER_ID = '2';
@@ -23,6 +21,8 @@ public class GameplayBehaviour : MonoBehaviour
     private int[][] _stageMap;
     private Transform _player;
     private Vector2Int _playerPos;
+    private Vector2Int _playerMovement;
+    private bool _isMoving;
 
     // Start is called before the first frame update
     void Start()
@@ -85,13 +85,25 @@ public class GameplayBehaviour : MonoBehaviour
 
     void HandlePlayerMovement()
     {
+        if (_isMoving)
+            Move();
+        else
+            DetectNewMovement();
+    }
+
+    void DetectNewMovement()
+    {
         var movement = PlayerMovement();
         if (movement == Vector2Int.zero)
             return;
 
         if (CanPlayerMove(movement))
-            Move(movement);
+        {
+            _isMoving = true;
+            _playerMovement = movement;
+        }
     }
+
 
     Vector2Int PlayerMovement()
     {
@@ -107,9 +119,24 @@ public class GameplayBehaviour : MonoBehaviour
         return _stageMap[_playerPos.x + movement.x][_playerPos.y + movement.y] != WALL_ID;
     }
 
-    void Move(Vector2Int movement)
+    void Move()
     {
-        _playerPos += movement;
-        _player.localPosition = (Vector3Int)_playerPos;
+        Vector2 newPos = (Vector2)_player.localPosition + (Vector2)_playerMovement * PLAYER_SPEED * Time.deltaTime;
+        Vector2 nextPosition = _playerPos + _playerMovement;
+        if ((nextPosition - newPos).sqrMagnitude < 0.005f)
+            PlayerReachedNewTile();
+        //else 
+            _player.localPosition = newPos;
+    }
+
+    void PlayerReachedNewTile()
+    {
+        _playerPos += _playerMovement;
+        if (!CanPlayerMove(_playerMovement))
+        {
+            _isMoving = false;
+            _playerMovement = Vector2Int.zero;
+            //_player.localPosition = (Vector2)_playerPos;
+        }
     }
 }
