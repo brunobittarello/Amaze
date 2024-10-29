@@ -1,13 +1,17 @@
+using System.Collections;
 using UnityEngine;
 
 public class GameplayBehaviour : MonoBehaviour
 {
     const int POOL_SIZE = 50;
-    const float PLAYER_SPEED = 10f;
+    const float PLAYER_SPEED = 20f;
 
     const char WALL_ID = '1';
     const char PLAYER_ID = '2';
     const int CHECK_ID = 3;
+
+    [SerializeField]
+    private float stageWaitingTime;
 
     [SerializeField]
     private TextAsset[] stageMap;
@@ -58,7 +62,8 @@ public class GameplayBehaviour : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        HandlePlayerMovement();
+        if (!_isStageClear)
+            HandlePlayerMovement();
     }
 
     void CreatePool()
@@ -90,7 +95,7 @@ public class GameplayBehaviour : MonoBehaviour
             _stageMap[i] = new int[maxY];
             for (int l = 0; l < maxY; l++)
             {
-                var itemId = mapGrid[maxY - i - 1][l];
+                var itemId = mapGrid[maxY - l - 1][i];
                 if (itemId == WALL_ID)
                 {
                     _stageMap[i][l] = WALL_ID;
@@ -175,6 +180,7 @@ public class GameplayBehaviour : MonoBehaviour
         _isMoving = false;
         _playerMovement = Vector2Int.zero;
         _player.localPosition = (Vector2)_playerPos;
+        CheckWinningCodintion();
     }
 
     void CheckTile(Vector2Int tilePos)
@@ -186,7 +192,6 @@ public class GameplayBehaviour : MonoBehaviour
         var tile = _tilePool.GetChild(0);
         tile.parent = _stageTiles;
         tile.localPosition = (Vector2)tilePos;
-        CheckWinningCodintion();
     }
 
     void CheckWinningCodintion()
@@ -196,8 +201,15 @@ public class GameplayBehaviour : MonoBehaviour
                 if (_stageMap[x][y] == 0)
                     return;
 
+        
+        StartCoroutine(OnStageClear());
+    }
+
+    IEnumerator OnStageClear()
+    {
         Debug.Log("Stage Clear!");
         _isStageClear = true;
+        yield return new WaitForSeconds(stageWaitingTime);
         ResetStage();
         _stageIndex++;
         LoadStage();
@@ -205,6 +217,7 @@ public class GameplayBehaviour : MonoBehaviour
 
     void ResetStage()
     {
+        _isStageClear = false;
         for (int i = _stageWalls.childCount - 1; i >= 0; i--)
             _stageWalls.GetChild(i).parent = _wallPool;
         for (int i = _stageTiles.childCount - 1; i >= 0; i--)
