@@ -152,6 +152,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 820ebbcc394d9c747bdf693d1ceb299d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  stageWaitingTime: 1
+  touchDeltaDist: 5
   stageMap:
   - {fileID: 4900000, guid: 2bf2b0e9eb1de324baec7e2f89de3620, type: 3}
   - {fileID: 4900000, guid: ac9ff0e4eeddd61429a6a08f006afd4a, type: 3}

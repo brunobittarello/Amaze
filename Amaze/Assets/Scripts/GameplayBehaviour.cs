@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.VisualScripting.ReorderableList.Element_Adder_Menu;
 using UnityEngine;
 
 public class GameplayBehaviour : MonoBehaviour
@@ -12,6 +13,8 @@ public class GameplayBehaviour : MonoBehaviour
 
     [SerializeField]
     private float stageWaitingTime;
+    [SerializeField]
+    private float touchDeltaDist = 5f;
 
     [SerializeField]
     private TextAsset[] stageMap;
@@ -36,6 +39,8 @@ public class GameplayBehaviour : MonoBehaviour
     private bool _isMoving;
     private bool _isStageClear;
     private int _stageIndex;
+
+    private Vector2 _touchRefPos;
 
     // Start is called before the first frame update
     void Start()
@@ -149,8 +154,95 @@ public class GameplayBehaviour : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.S)) return Vector2Int.down;
         if (Input.GetKeyDown(KeyCode.A)) return Vector2Int.left;
         if (Input.GetKeyDown(KeyCode.D)) return Vector2Int.right;
+        return TouchMovement();
+    }
+
+    Vector2 GetMouseTouchPosition()
+    {
+        if (Input.GetMouseButton(0))
+            return Input.mousePosition;
+
+        if (Input.touchCount > 0)
+        {
+            var touch = Input.GetTouch(0);
+            return touch.position;
+        }
+        return Vector2.zero;
+    }
+
+    Vector2Int TouchMovement()
+    {
+        Debug.Log("TouchMovement");
+        var touchPosition = GetMouseTouchPosition();
+        if (touchPosition == Vector2.zero)
+        {
+            _touchRefPos = Vector2.zero;
+            return Vector2Int.zero;
+        }
+        Debug.Log("touchPosition " + touchPosition);
+        if (_touchRefPos == Vector2.zero)
+        {
+            _touchRefPos = touchPosition;
+            return Vector2Int.zero;
+        }
+
+        var delta = touchPosition - _touchRefPos;
+        if (delta.sqrMagnitude < touchDeltaDist)
+            return Vector2Int.zero;
+
+        return Snap(delta);
+
+        // var cross = Vector2.(delta, vehicleForward);
+
+
+        // if (Input.touchCount > 0)
+        // {
+        //     var touch = Input.GetTouch(0);
+        // }
+
+        // {
+
+        //     switch (touch.phase)
+        //     {
+        //         case TouchPhase.Moved:
+        //             Debug.Log(touch.deltaPosition);
+        //             // currentDirection = touch.deltaPosition * speedModifier;
+        //             // transform.position += currentDirection;
+        //             break;
+
+        //         case TouchPhase.Stationary:
+        //             // transform.position += currentDirection;
+        //             break;
+
+        //         default:
+        //             // currentDirection = Vector2.zero;
+        //             break;
+        //     }
+        // }
+        // return Vector2Int.zero;
+    }
+
+    void ResetTouchReference()
+    {
+        _touchRefPos = GetMouseTouchPosition();
+    }
+
+    Vector2Int Snap(Vector2 dir)
+    {
+        float absX = Mathf.Abs(dir.x);
+        float absY = Mathf.Abs(dir.y);
+
+        if (absX > absY)
+        {
+            return dir.x > 0 ? Vector2Int.right : Vector2Int.left;
+        }
+        else if (absX < absY)
+        {
+            return dir.y > 0 ? Vector2Int.up : Vector2Int.down;
+        }
         return Vector2Int.zero;
     }
+
 
     bool CanPlayerMove(Vector2Int movement)
     {
@@ -180,6 +272,7 @@ public class GameplayBehaviour : MonoBehaviour
         _isMoving = false;
         _playerMovement = Vector2Int.zero;
         _player.localPosition = (Vector2)_playerPos;
+        ResetTouchReference();
         CheckWinningCodintion();
     }
 
@@ -201,7 +294,7 @@ public class GameplayBehaviour : MonoBehaviour
                 if (_stageMap[x][y] == 0)
                     return;
 
-        
+
         StartCoroutine(OnStageClear());
     }
 
