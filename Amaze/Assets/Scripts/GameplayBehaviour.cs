@@ -1,5 +1,5 @@
 using System.Collections;
-using Unity.VisualScripting.ReorderableList.Element_Adder_Menu;
+using TMPro;
 using UnityEngine;
 
 public class GameplayBehaviour : MonoBehaviour
@@ -25,6 +25,8 @@ public class GameplayBehaviour : MonoBehaviour
     private GameObject WallPrefab;
     [SerializeField]
     private GameObject TileCheckPrefab;
+    [SerializeField]
+    private TextMeshProUGUI LevelLabel;
 
     private Transform _wallPool;
     private Transform _tilePool;
@@ -90,6 +92,7 @@ public class GameplayBehaviour : MonoBehaviour
 
     void LoadStage()
     {
+        LevelLabel.text = "Level " + (_stageIndex + 1);
         var mapGrid = LoadStageFromFile();
         var maxX = mapGrid[0].Length - 1;//TODO
         var maxY = mapGrid.Length;
@@ -123,7 +126,7 @@ public class GameplayBehaviour : MonoBehaviour
         }
     }
 
-    string[] LoadStageFromFile() => stageMap[_stageIndex].text.Split('\n');
+    string[] LoadStageFromFile() => stageMap[_stageIndex % stageMap.Length].text.Split('\n');
 
     void HandlePlayerMovement()
     {
@@ -172,14 +175,12 @@ public class GameplayBehaviour : MonoBehaviour
 
     Vector2Int TouchMovement()
     {
-        Debug.Log("TouchMovement");
         var touchPosition = GetMouseTouchPosition();
         if (touchPosition == Vector2.zero)
         {
             _touchRefPos = Vector2.zero;
             return Vector2Int.zero;
         }
-        Debug.Log("touchPosition " + touchPosition);
         if (_touchRefPos == Vector2.zero)
         {
             _touchRefPos = touchPosition;
