@@ -10,7 +10,7 @@ public class GameplayBehaviour : MonoBehaviour
     const int CHECK_ID = 3;
 
     [SerializeField]
-    private TextAsset stageMap;
+    private TextAsset[] stageMap;
 
     [SerializeField]
     private GameObject PlayerPrefab;
@@ -21,32 +21,38 @@ public class GameplayBehaviour : MonoBehaviour
 
     private Transform _wallPool;
     private Transform _tilePool;
-    private Transform _stage;
+    private Transform _stageWalls;
+    private Transform _stageTiles;
+    private Transform _stagePlayers;
     private int[][] _stageMap;
     private Transform _player;
     private Vector2Int _playerPos;
     private Vector2Int _playerNextPos;
     private Vector2Int _playerMovement;
     private bool _isMoving;
+    private bool _isStageClear;
+    private int _stageIndex;
 
     // Start is called before the first frame update
     void Start()
     {
-        _wallPool = new GameObject("WallPool").transform;
-        _wallPool.parent = this.transform;
-        _wallPool.gameObject.SetActive(false);
+        _wallPool = CreateContainers("WallPool", true);
+        _tilePool = CreateContainers("TilePool", true);
 
-        _tilePool = new GameObject("TilePool").transform;
-        _tilePool.parent = this.transform;
-        _tilePool.gameObject.SetActive(false);
-
-        _stage = new GameObject("Stage").transform;
-        _stage.parent = this.transform;
+        _stageWalls = CreateContainers("Walls", false);
+        _stageTiles = CreateContainers("Tiles", false);
+        _stagePlayers = CreateContainers("Players", false);
 
         CreatePool();
+        LoadStage();
+    }
 
-        var stageGrid = stageMap.text.Split('\n');
-        LoadStage(stageGrid, stageGrid[0].Length - 1, stageGrid.Length);
+    Transform CreateContainers(string name, bool isPool)
+    {
+        var transform = new GameObject(name).transform;
+        transform.parent = this.transform;
+        transform.gameObject.SetActive(!isPool);
+        return transform;
     }
 
     // Update is called once per frame
@@ -72,8 +78,12 @@ public class GameplayBehaviour : MonoBehaviour
         }
     }
 
-    void LoadStage(string[] mapGrid, int maxX, int maxY)
+    void LoadStage()
     {
+        var mapGrid = LoadStageFromFile();
+        var maxX = mapGrid[0].Length - 1;//TODO
+        var maxY = mapGrid.Length;
+
         _stageMap = new int[maxX][];
         for (int i = 0; i < maxX; i++)
         {
@@ -85,13 +95,16 @@ public class GameplayBehaviour : MonoBehaviour
                 {
                     _stageMap[i][l] = WALL_ID;
                     var wall = _wallPool.GetChild(0);
-                    wall.parent = _stage;
+                    wall.parent = _stageWalls;
                     wall.localPosition = new Vector2(i, l);
                 }
                 else if (itemId == PLAYER_ID)
                 {
-                    _player = Instantiate(PlayerPrefab).transform;
-                    _player.parent = _stage;
+                    if (_player == null)
+                    {
+                        _player = Instantiate(PlayerPrefab).transform;
+                        _player.parent = _stagePlayers;
+                    }
                     _player.localPosition = new Vector2(i, l);
                     _playerPos = new Vector2Int(i, l);
                     CheckTile(_playerPos);
@@ -99,6 +112,8 @@ public class GameplayBehaviour : MonoBehaviour
             }
         }
     }
+
+    string[] LoadStageFromFile() => stageMap[_stageIndex].text.Split('\n');
 
     void HandlePlayerMovement()
     {
@@ -169,7 +184,30 @@ public class GameplayBehaviour : MonoBehaviour
 
         _stageMap[tilePos.x][tilePos.y] = CHECK_ID;
         var tile = _tilePool.GetChild(0);
-        tile.parent = _stage;
+        tile.parent = _stageTiles;
         tile.localPosition = (Vector2)tilePos;
+        CheckWinningCodintion();
+    }
+
+    void CheckWinningCodintion()
+    {
+        for (int x = 0; x < _stageMap.Length; x++)
+            for (int y = 0; y < _stageMap[x].Length; y++)
+                if (_stageMap[x][y] == 0)
+                    return;
+
+        Debug.Log("Stage Clear!");
+        _isStageClear = true;
+        ResetStage();
+        _stageIndex++;
+        LoadStage();
+    }
+
+    void ResetStage()
+    {
+        for (int i = _stageWalls.childCount - 1; i >= 0; i--)
+            _stageWalls.GetChild(i).parent = _wallPool;
+        for (int i = _stageTiles.childCount - 1; i >= 0; i--)
+            _stageTiles.GetChild(i).parent = _tilePool;
     }
 }
