@@ -32,6 +32,7 @@ public class GameplayBehaviour : MonoBehaviour
 
     private Transform _wallPool;
     private Transform _tilePool;
+    private Transform _effects;
     private Transform _stageWalls;
     private Transform _stageTiles;
     private Transform _stagePlayers;
@@ -55,6 +56,7 @@ public class GameplayBehaviour : MonoBehaviour
         _stageWalls = CreateContainers("Walls", false);
         _stageTiles = CreateContainers("Tiles", false);
         _stagePlayers = CreateContainers("Players", false);
+        _effects = CreateContainers("Effects", false);
 
         CreatePool();
         LoadStage();
@@ -89,6 +91,14 @@ public class GameplayBehaviour : MonoBehaviour
             var clone = Instantiate(TileCheckPrefab);
             clone.gameObject.name = "Tile " + (i + 1);
             clone.transform.parent = _tilePool;
+        }
+
+        for (int i = 0; i < 5; i++)
+        {
+            var clone = Instantiate(HitWallEffectPrefab);
+            clone.gameObject.name = "HitWallFx " + (i + 1);
+            clone.gameObject.SetActive(false);
+            clone.transform.parent = _effects;
         }
     }
 
@@ -284,8 +294,11 @@ public class GameplayBehaviour : MonoBehaviour
 
     void CreateHitWallEffect()
     {
-        var clone = Instantiate(HitWallEffectPrefab);
-        clone.transform.position = _player.transform.position + Vector3.back * 5;
+        var effect = _effects.GetChild(0);
+        effect.gameObject.SetActive(false);
+        effect.position = _player.transform.position + Vector3.back * 5;
+        effect.SetAsLastSibling();
+        effect.gameObject.SetActive(true);
     }
 
     void CheckTile(Vector2Int tilePos)

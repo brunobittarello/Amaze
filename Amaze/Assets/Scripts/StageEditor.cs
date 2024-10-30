@@ -130,7 +130,7 @@ public class StageEditor : Editor
         {
             var line = "";
             for (int x = 0; x < stage[0].Length; x++)
-                line += stage[y][x].ToString().Replace('1','1');
+                line += stage[y][x].ToString().Replace('9','1');
             data[stage.Length - 1 - y] = line;
         }
         return data;
