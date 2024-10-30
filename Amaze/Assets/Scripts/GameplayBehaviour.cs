@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GameplayBehaviour : MonoBehaviour
 {
-    const int POOL_SIZE = 50;
+    const int POOL_SIZE = 100;
     const float PLAYER_SPEED = 20f;
 
     const char WALL_ID = '1';
@@ -25,6 +25,8 @@ public class GameplayBehaviour : MonoBehaviour
     private GameObject WallPrefab;
     [SerializeField]
     private GameObject TileCheckPrefab;
+    [SerializeField]
+    private GameObject HitWallEffectPrefab;
     [SerializeField]
     private TextMeshProUGUI LevelLabel;
 
@@ -96,6 +98,7 @@ public class GameplayBehaviour : MonoBehaviour
         var mapGrid = LoadStageFromFile();
         var maxX = mapGrid[0].Length - 1;//TODO
         var maxY = mapGrid.Length;
+        Debug.Log("StageSize " + maxX + "x" + maxY);
 
         _stageMap = new int[maxX][];
         for (int i = 0; i < maxX; i++)
@@ -273,8 +276,16 @@ public class GameplayBehaviour : MonoBehaviour
         _isMoving = false;
         _playerMovement = Vector2Int.zero;
         _player.localPosition = (Vector2)_playerPos;
+
+        CreateHitWallEffect();
         ResetTouchReference();
         CheckWinningCodintion();
+    }
+
+    void CreateHitWallEffect()
+    {
+        var clone = Instantiate(HitWallEffectPrefab);
+        clone.transform.position = _player.transform.position + Vector3.back * 5;
     }
 
     void CheckTile(Vector2Int tilePos)
