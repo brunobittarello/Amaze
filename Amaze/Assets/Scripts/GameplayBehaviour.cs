@@ -146,6 +146,13 @@ public class GameplayBehaviour : MonoBehaviour
 
     void HandlePlayerMovement()
     {
+        if (Input.GetKeyDown(KeyCode.R)) 
+        {
+            ResetStage();
+            LoadStage();
+            return;
+        }
+
         if (_isMoving)
             Move();
         else
@@ -208,35 +215,6 @@ public class GameplayBehaviour : MonoBehaviour
             return Vector2Int.zero;
 
         return Snap(delta);
-
-        // var cross = Vector2.(delta, vehicleForward);
-
-
-        // if (Input.touchCount > 0)
-        // {
-        //     var touch = Input.GetTouch(0);
-        // }
-
-        // {
-
-        //     switch (touch.phase)
-        //     {
-        //         case TouchPhase.Moved:
-        //             Debug.Log(touch.deltaPosition);
-        //             // currentDirection = touch.deltaPosition * speedModifier;
-        //             // transform.position += currentDirection;
-        //             break;
-
-        //         case TouchPhase.Stationary:
-        //             // transform.position += currentDirection;
-        //             break;
-
-        //         default:
-        //             // currentDirection = Vector2.zero;
-        //             break;
-        //     }
-        // }
-        // return Vector2Int.zero;
     }
 
     void ResetTouchReference()
