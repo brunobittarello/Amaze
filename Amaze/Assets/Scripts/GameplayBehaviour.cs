@@ -29,6 +29,8 @@ public class GameplayBehaviour : MonoBehaviour
     private GameObject HitWallEffectPrefab;
     [SerializeField]
     private TextMeshProUGUI LevelLabel;
+    [SerializeField]
+    private CameraController cameraCtrl;
 
     private Transform _wallPool;
     private Transform _tilePool;
@@ -110,6 +112,7 @@ public class GameplayBehaviour : MonoBehaviour
         var maxY = mapGrid.Length;
         Debug.Log("StageSize " + maxX + "x" + maxY);
 
+        cameraCtrl.Focus(new Vector2(maxX, maxY));
         _stageMap = new int[maxX][];
         for (int i = 0; i < maxX; i++)
         {
