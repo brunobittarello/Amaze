@@ -6,6 +6,7 @@ using UnityEngine;
 [CustomEditor(typeof(GameplayBehaviour))]
 public class StageEditor : Editor
 {
+    const int RANDOM_LINE_TRY_LIMIT = 300;
     readonly bool DEBUG_STAGE_CREATION = true;
     public override void OnInspectorGUI()
     {
@@ -49,53 +50,70 @@ public class StageEditor : Editor
     {
         for (int i = 0; i < 5; i++)
         {
-            if (CreateRandomStage(name, difficult))
+            if (CreateRandomStage(name, difficult, i))
                 return true;
         }
         Debug.Log("Give up on " + name);
         return false;
     }
 
-    bool CreateRandomStage(string name, StageDifficult difficult)
+    bool CreateRandomStage(string name, StageDifficult difficult, int tentative)
     {
         var settings = GetStageSettings(difficult);
-        var stage = InitiateStage(Random.Range(settings.SizeMin, settings.SizeMax), Random.Range(settings.SizeMin, settings.SizeMax));
-        stage[1][1] = 2;
-        var limit = 0;
+        var stageSize = new Vector2Int(Random.Range(settings.SizeMin, settings.SizeMax), Random.Range(settings.SizeMin, settings.SizeMax));
+        var stage = InitiateStage(stageSize.x, stageSize.y);
         var moves = Random.Range(settings.MovesMin, settings.MovesMax);
-        Debug.Log("Size " + stage.Length + "x" + stage[0].Length + " Moves " + moves);
+        int maxSize = (int)(stage.Length * 0.7f);
 
+        Debug.Log("Size " + stageSize.x + "x" + stageSize.y + " Moves " + moves);
+
+        if (!CreateMovements(name, stage, stageSize, maxSize, moves, settings.MovesMin, tentative))
+            return false;
+
+        // CreateStartPoint(stage, stageSize);
+        var stageStr = StageIntoString(stage, false);
+        SaveStage(name, stageStr);
+        AssetDatabase.Refresh();
+        Debug.Log("Stage Created!");
+        return true;
+    }
+
+    bool CreateMovements(string name, int[][] stage, Vector2Int stageSize, int maxSize, int moves, int minMoves, int tentative)
+    {
+        var limit = 0;
+        int lines;
         var queue = new Queue<Vector2Int>();
-        queue.Enqueue(new Vector2Int(1, 1));
-        for (int l = 0; l < moves && limit < 100;)
+        // var start = new Vector2Int(Random.Range(1, stageSize.x - 1), Random.Range(1, stageSize.y - 1));
+        var start = new Vector2Int(1, 1);//TODO
+        stage[start.y][start.x] = 2;
+
+        queue.Enqueue(start);
+        for (lines = 0; lines < moves && limit < RANDOM_LINE_TRY_LIMIT;)
         {
             var pivot = queue.Dequeue();
             // if (Random.value < settings.BifurcationChance ) {
             //     Debug.Log("Bifurcation");
             //     queue.Enqueue(pivot);
             // }
-            var size = Random.Range(1, stage.Length);
+            var size = Random.Range(1, maxSize);
             var newPivot = AddRandomLine(stage, pivot, size);
             if (pivot != newPivot)
             {
-                pivot = newPivot;
-                l++;
+                queue.Enqueue(newPivot);
+                lines++;
                 if (DEBUG_STAGE_CREATION)
-                    SaveStage("Debug/" + name + "-" + l, StageIntoString(stage, true));
+                    SaveStage("Debug/" + name + "-" + tentative + "-" + lines, StageIntoString(stage, true));
             }
-            queue.Enqueue(pivot);
+            else if (queue.Count == 0)
+                queue.Enqueue(pivot);
             limit++;
         }
 
-        if (limit == 100)
+        if (limit == RANDOM_LINE_TRY_LIMIT && lines < minMoves)
         {
             Debug.LogWarning("failed to create");
             return false;
         }
-        var stageStr = StageIntoString(stage, false);
-        SaveStage(name, stageStr);
-        AssetDatabase.Refresh();
-        Debug.Log("Stage Created!");
         return true;
     }
 
@@ -106,31 +124,31 @@ public class StageEditor : Editor
             SizeMin = 7,
             SizeMax = 9,
             MovesMin = 7,
-            MovesMax = 9,
+            MovesMax = 10,
             BifurcationChance = 0
         },
         StageDifficult.Modarate => new StageCreationSettings()
         {
             SizeMin = 9,
             SizeMax = 13,
-            MovesMin = 10,
-            MovesMax = 15,
+            MovesMin = 12,
+            MovesMax = 17,
             BifurcationChance = 0.05f
         },
         StageDifficult.Hard => new StageCreationSettings()
         {
             SizeMin = 12,
             SizeMax = 15,
-            MovesMin = 13,
-            MovesMax = 18,
+            MovesMin = 20,
+            MovesMax = 25,
             BifurcationChance = 0.15f
         },
         StageDifficult.VeryHard => new StageCreationSettings()
         {
             SizeMin = 12,
             SizeMax = 16,
-            MovesMin = 15,
-            MovesMax = 25,
+            MovesMin = 25,
+            MovesMax = 35,
             BifurcationChance = 0.2f
         },
         _ => null,
@@ -208,6 +226,17 @@ public class StageEditor : Editor
             default:
                 return Vector2Int.right;
         }
+    }
+
+    void CreateStartPoint(int[][] stage, Vector2Int size)
+    {
+        for (int x = 0; x < size.x; x++)
+            for (int y = 0; y < size.y; y++)
+                if (stage[y][x] == 0)
+                {
+                    stage[y][x] = 2;
+                    return;
+                }
     }
 
     string[] StageIntoString(int[][] stage, bool isDebug)

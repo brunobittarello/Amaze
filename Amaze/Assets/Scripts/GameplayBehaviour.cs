@@ -146,15 +146,14 @@ public class GameplayBehaviour : MonoBehaviour
 
     void HandlePlayerMovement()
     {
-        if (Input.GetKeyDown(KeyCode.R)) 
+        if (_isMoving)
+            Move();
+        else if (Input.GetKeyDown(KeyCode.R))
         {
             ResetStage();
             LoadStage();
             return;
         }
-
-        if (_isMoving)
-            Move();
         else
             DetectNewMovement();
     }
