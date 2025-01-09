@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GameplayBehaviour : MonoBehaviour
 {
-    const int POOL_SIZE = 256;
+    const int POOL_SIZE = 400;
     const float PLAYER_SPEED = 20f;
 
     const char WALL_ID = '1';

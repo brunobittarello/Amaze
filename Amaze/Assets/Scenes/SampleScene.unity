@@ -38,7 +38,6 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -164,6 +163,9 @@ MonoBehaviour:
   - {fileID: 4900000, guid: 0aad42498c62d9c43ade29036d2f8233, type: 3}
   - {fileID: 4900000, guid: 5b3e91022fde83147aabddfcaf8bcf29, type: 3}
   - {fileID: 4900000, guid: fa27bd26edf65f54792338b303c01099, type: 3}
+  - {fileID: 4900000, guid: 72617d6c187c0454e81a1f5a7d48742a, type: 3}
+  - {fileID: 4900000, guid: 3ac448362b7bbce4988b8f99d4dfe8a2, type: 3}
+  - {fileID: 4900000, guid: 36ced60463156e74a8176a030e83af12, type: 3}
   PlayerPrefab: {fileID: 5600620423238713294, guid: 56bd2286ac5707c4caf8454552b57d7a, type: 3}
   WallPrefab: {fileID: 2850100951796789173, guid: 7dfdca7a6bddb454383d160b5e22bbd1, type: 3}
   TileCheckPrefab: {fileID: 1997600373942698753, guid: 20e1677d2e4b49a4788f14148b0f5f61, type: 3}
