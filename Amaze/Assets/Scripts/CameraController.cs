@@ -12,6 +12,6 @@ public class CameraController : MonoBehaviour
     public void Focus(Vector2 size)
     {
         this.transform.localPosition = size * 0.5f;
-        _camera.orthographicSize = size.x;
+        _camera.orthographicSize = size.x * 1.15f;
     }
 }
