@@ -7,6 +7,8 @@ I tried to create a random stage generator, but it was not good enough. My first
 After 9 hours, after months where I didnt opened the unity, this result is good enough for me. I don't like this game that much to keep improving it.  
 Feel free to copy or fork it.  
 
+Build download link: https://drive.google.com/file/d/1nzBtvrxjv5fdh1LYGKWhf1gKA-NrDlSq/view?usp=drive_link
+
 ## Timelapse  
 [![IMAGE ALT TEXT](http://img.youtube.com/vi/ZAi_TQ_B6-M/0.jpg)](http://www.youtube.com/watch?v=ZAi_TQ_B6-M "Video Title")  
 
